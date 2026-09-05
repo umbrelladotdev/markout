@@ -15,8 +15,9 @@ export function Preview({ html, mermaidBlocks }: Props) {
   useEffect(() => {
     const root = ref.current;
     if (!root) return;
-    const slots = root.querySelectorAll<HTMLElement>(".mermaid-slot");
+    root.innerHTML = html;
     let cancelled = false;
+    const slots = root.querySelectorAll<HTMLElement>(".mermaid-slot");
 
     slots.forEach((slot) => {
       const hash = slot.dataset.hash ?? "";
@@ -56,11 +57,7 @@ export function Preview({ html, mermaidBlocks }: Props) {
 
   return (
     <div className="preview-scroll">
-      <article
-        ref={ref}
-        className="preview-article"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <article ref={ref} className="preview-article" />
     </div>
   );
 }

@@ -43,9 +43,10 @@ async function loadMermaid() {
       startOnLoad: false,
       securityLevel: "strict",
       theme: "neutral",
-      fontFamily: "Trebuchet MS, system-ui, sans-serif",
+      fontFamily: "Trebuchet MS, Verdana, Arial, sans-serif",
       flowchart: { htmlLabels: false, curve: "basis" },
       themeVariables: {
+        fontFamily: "Trebuchet MS, Verdana, Arial, sans-serif",
         primaryColor: "#e7f0ed",
         primaryTextColor: "#1a3c34",
         primaryBorderColor: "#2c5f54",
@@ -129,33 +130,74 @@ function svgDimensions(svg: string): { width: number; height: number } {
   return { width, height };
 }
 
+function prepareSvg(svg: string): string {
+  return svg
+    .replace(/@import[^;]+;/gi, "")
+    .replace(/url\((['"]?)https?:\/\/[^)]+\)/gi, "")
+    .replace(/\s(?:xlink:)?href=["']https?:\/\/[^"']+["']/gi, "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "");
+}
+
 export async function svgToPng(
   svg: string,
   maxWidth = 1400,
 ): Promise<{ dataUrl: string; width: number; height: number; bytes: Uint8Array }> {
-  const size = svgDimensions(svg);
-  const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
+  const cleaned = prepareSvg(svg);
+  const size = svgDimensions(cleaned);
+  const widthHint = size.width || 800;
+  const heightHint = size.height || 450;
+  const scale = Math.min(2, widthHint > 0 ? maxWidth / widthHint : 2);
+  const width = Math.max(1, Math.round(widthHint * scale));
+  const height = Math.max(1, Math.round(heightHint * scale));
+
   try {
-    const img = await loadImage(url);
-    const naturalW = img.naturalWidth || size.width;
-    const naturalH = img.naturalHeight || size.height;
-    const scale = Math.min(2, naturalW > 0 ? maxWidth / naturalW : 2);
-    const width = Math.max(1, Math.round(naturalW * scale));
-    const height = Math.max(1, Math.round(naturalH * scale));
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Canvas indisponible pour le rendu du diagramme.");
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, width, height);
-    ctx.drawImage(img, 0, 0, width, height);
-    const dataUrl = canvas.toDataURL("image/png");
-    return { dataUrl, width, height, bytes: dataUrlToBytes(dataUrl) };
-  } finally {
-    URL.revokeObjectURL(url);
+    return await rasterizeWithImage(cleaned, width, height);
+  } catch {
+    return rasterizeWithCanvg(cleaned, width, height);
   }
+}
+
+async function rasterizeWithImage(
+  svg: string,
+  width: number,
+  height: number,
+): Promise<{ dataUrl: string; width: number; height: number; bytes: Uint8Array }> {
+  const dataUrlSvg = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  const img = await loadImage(dataUrlSvg);
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas indisponible pour le rendu du diagramme.");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(img, 0, 0, width, height);
+  const dataUrl = canvas.toDataURL("image/png");
+  return { dataUrl, width, height, bytes: dataUrlToBytes(dataUrl) };
+}
+
+async function rasterizeWithCanvg(
+  svg: string,
+  width: number,
+  height: number,
+): Promise<{ dataUrl: string; width: number; height: number; bytes: Uint8Array }> {
+  const { Canvg } = await import("canvg");
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas indisponible pour le rendu du diagramme.");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+  const renderer = Canvg.fromString(ctx, svg, {
+    ignoreMouse: true,
+    ignoreAnimation: true,
+    ignoreDimensions: true,
+  });
+  renderer.resize(width, height, "xMidYMid meet");
+  await renderer.render();
+  const dataUrl = canvas.toDataURL("image/png");
+  return { dataUrl, width, height, bytes: dataUrlToBytes(dataUrl) };
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {

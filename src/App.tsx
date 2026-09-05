@@ -39,6 +39,11 @@ function fileNameOf(path: string | null, fallback = "brouillon.md"): string {
   return parts[parts.length - 1] || fallback;
 }
 
+function sameIssues(a: MermaidIssue[], b: MermaidIssue[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((issue, i) => issue.hash === b[i].hash && issue.message === b[i].message);
+}
+
 export default function App() {
   const draft = useMemo(() => loadDraft(), []);
   const [markdown, setMarkdown] = useState(draft?.markdown ?? WELCOME_MARKDOWN);
@@ -81,7 +86,9 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     void collectMermaidIssues(parsed.mermaid).then((next) => {
-      if (!cancelled) setIssues(next);
+      if (!cancelled) {
+        setIssues((current) => (sameIssues(current, next) ? current : next));
+      }
     });
     return () => {
       cancelled = true;

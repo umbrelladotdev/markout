@@ -37,7 +37,7 @@ Mesure à prendre sur le binaire de release (`npm run tauri -- build`) de la mac
 | `marked` | Parser GFM unique preview/export | Bundle, léger |
 | `mermaid` | Rendu diagrammes | **Code-split / import dynamique** dès qu’un fence `mermaid` existe |
 | `pdfmake` + vfs Roboto | PDF A4 + TOC | Bundle export |
-| `docx` | DOCX + champ TOC + styles Heading | Bundle export |
+| `canvg` | Rasterisation SVG → PNG si le canvas est « tainted » | Import dynamique à l’export seulement |
 
 Mermaid est la plus grosse JS (cœur produit) : justifiée, chargée à la demande, tree-shaking limité côté lib elle-même.
 
