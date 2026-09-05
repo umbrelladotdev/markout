@@ -1,0 +1,293 @@
+:root {
+  color-scheme: light;
+  --bg: #efebe3;
+  --surface: #faf8f4;
+  --preview: #fffdf8;
+  --ink: #1c1917;
+  --muted: #6b6560;
+  --line: #e4dfd6;
+  --accent: #21554a;
+  --accent-hover: #173e36;
+  --danger: #9b2c2c;
+  --danger-bg: #fdecec;
+  --ok: #21554a;
+  --shadow: 0 10px 30px rgba(28, 25, 23, 0.08);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+button, input { font: inherit; }
+
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  background: var(--bg);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: #f7f4ee;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 180px;
+}
+.mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #f7f4ee;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+.brand-name { font-weight: 700; letter-spacing: 0.01em; }
+.file-label { color: var(--muted); font-size: 12px; }
+
+.toolbar-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.toolbar-export { margin-left: auto; }
+
+.toolbar button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.toolbar button:hover { border-color: #cfc9bd; }
+.toolbar button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #f6f4ef;
+}
+.toolbar button.primary:hover { background: var(--accent-hover); }
+.toolbar button:disabled { opacity: 0.55; cursor: not-allowed; }
+.toolbar button.active {
+  background: #e7f0ed;
+  border-color: #b7cdc6;
+  color: var(--accent);
+}
+
+.export-block-hint {
+  color: var(--danger);
+  font-size: 12px;
+  margin-right: 6px;
+}
+
+.export-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--line);
+  background: #e7f0ed;
+  font-size: 13px;
+}
+.export-progress-track {
+  flex: 1;
+  height: 6px;
+  background: #d5e4df;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.export-progress-fill {
+  height: 100%;
+  background: var(--accent);
+}
+
+.workspace {
+  display: flex;
+  min-height: 0;
+}
+.pane { min-width: 0; min-height: 0; }
+.editor-pane { background: var(--surface); }
+.preview-pane { background: var(--preview); }
+
+.view-editor .preview-pane,
+.view-preview .editor-pane { display: none; }
+.view-editor .editor-pane,
+.view-preview .preview-pane { flex: 1; }
+.view-split .pane { flex: 1 1 auto; }
+
+.splitter {
+  width: 8px;
+  padding: 0;
+  border: 0;
+  background: var(--line);
+  cursor: col-resize;
+}
+.splitter:hover { background: #cfc9bd; }
+
+.editor-host { height: 100%; }
+.editor-host .cm-editor { height: 100%; }
+
+.preview-scroll {
+  height: 100%;
+  overflow: auto;
+  padding: 28px 36px 64px;
+}
+.preview-article {
+  max-width: 46rem;
+  margin: 0 auto;
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: 17px;
+  line-height: 1.6;
+  color: #1c1917;
+}
+.preview-article h1,
+.preview-article h2,
+.preview-article h3,
+.preview-article h4 {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #1a3c34;
+  line-height: 1.25;
+  margin: 1.4em 0 0.5em;
+}
+.preview-article h1 { font-size: 2rem; margin-top: 0; }
+.preview-article h2 { font-size: 1.35rem; }
+.preview-article p { margin: 0 0 0.9em; }
+.preview-article a { color: var(--accent); }
+.preview-article blockquote {
+  margin: 0 0 1em;
+  padding: 0.2em 0 0.2em 1em;
+  border-left: 3px solid var(--accent);
+  color: #3f3a36;
+}
+.preview-article table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0 0 1.2em;
+  font-size: 0.95em;
+}
+.preview-article th,
+.preview-article td {
+  border: 1px solid #d7d2c8;
+  padding: 8px 10px;
+  text-align: left;
+}
+.preview-article th { background: #e7f0ed; }
+.preview-article pre {
+  background: #f3f0e9;
+  padding: 12px 14px;
+  border-radius: 8px;
+  overflow: auto;
+  font-size: 0.85em;
+}
+.preview-article code {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.88em;
+  color: #9a3412;
+}
+.preview-article hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 1.6em 0;
+}
+.preview-article ul, .preview-article ol { margin: 0 0 1em; padding-left: 1.3em; }
+
+.mermaid-slot { margin: 1.2em 0; }
+.mermaid-figure {
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+}
+.mermaid-figure svg { max-width: 100%; height: auto; }
+.mermaid-loading {
+  color: var(--muted);
+  font-style: italic;
+  padding: 12px;
+}
+.mermaid-error {
+  background: var(--danger-bg);
+  border: 1px solid #e8b4b4;
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--danger);
+}
+.mermaid-error p { margin: 6px 0; }
+.mermaid-error pre {
+  background: #fff;
+  color: #6b6560;
+  white-space: pre-wrap;
+}
+
+.statusbar {
+  display: flex;
+  gap: 16px;
+  padding: 6px 14px;
+  border-top: 1px solid var(--line);
+  background: #f7f4ee;
+  color: var(--muted);
+  font-size: 12px;
+}
+.statusbar .grow { flex: 1; }
+.status-error { color: var(--danger); font-weight: 600; }
+
+.toasts {
+  position: fixed;
+  right: 16px;
+  bottom: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 20;
+  width: min(360px, calc(100vw - 24px));
+}
+.toast {
+  display: flex;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 12px 12px 14px;
+  box-shadow: var(--shadow);
+  white-space: pre-wrap;
+}
+.toast-success { border-left: 4px solid var(--ok); }
+.toast-error { border-left: 4px solid var(--danger); }
+.toast-info { border-left: 4px solid #6b6560; }
+.toast p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+.toast button {
+  margin-top: 8px;
+  border: 0;
+  background: #e7f0ed;
+  color: var(--accent);
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.toast-close {
+  margin-top: 0 !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 4px !important;
+}
+
+@media (max-width: 900px) {
+  .toolbar { flex-wrap: wrap; }
+  .view-split .workspace { flex-direction: column; }
+  .splitter { width: 100%; height: 8px; cursor: row-resize; }
+}
