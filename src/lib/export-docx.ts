@@ -303,6 +303,6 @@ export async function buildDocx(
   title: string | null,
 ): Promise<Uint8Array> {
   const document = buildDocxDocument(blocks, diagrams, title);
-  const buffer = await Packer.toBuffer(document);
-  return buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  const buffer = await Packer.toArrayBuffer(document);
+  return new Uint8Array(buffer);
 }
