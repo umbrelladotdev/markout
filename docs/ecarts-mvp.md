@@ -8,7 +8,7 @@ Changelog par rapport au cahier des charges v0.2 draft.
 | Export PDF | Print WebView2 et/ou moteur léger | **`pdfmake`** (JS) | Identique Windows / macOS / Linux ; A4 ; TOC ; UTF-8 ; pas de Chromium |
 | Frontend | React **ou** Vue | **React** | Squelette Tauri 2 officiel `react-ts` |
 | Diagrammes export | PNG et/ou SVG | **PNG** dans PDF et DOCX | pdfmake n’embarque pas un moteur SVG robuste ; Word accepte PNG partout |
-| Distribution | `.msi` / `.exe` + portable à valider en M2 | Cibles **NSIS (installMode both)** + **MSI** ; builds `app` / `deb` aussi | Portable NSIS « current user » ; mesure taille à faire sur runner Windows |
+| Distribution | `.msi` / `.exe` + portable à valider en M2 | Cibles **NSIS (installMode both)** + **MSI** + **DMG** / `app` / `deb` ; workflow GitHub **Publish** sur `main` | Installateurs sur [Releases](https://github.com/umbrelladotdev/markout/releases/latest) (tag `latest`) + artefacts Actions |
 | OS MVP | Windows d’abord | Code **cross-platform** Tauri ; packaging Windows prioritaire | Linux/macOS pour dev et tests agents |
 | Mode navigateur | Non spécifié | Fallback téléchargement fichiers si l’UI Vite tourne hors Tauri | Dev / recette sans WebView |
 | Tests T9 footprint | Mesure Windows réelle | Inventaire + cibles documentés ; binaire mesuré quand le build natif est disponible | Pas d’installateur Windows dans l’environnement Linux de développement |

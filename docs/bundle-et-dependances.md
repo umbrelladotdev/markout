@@ -74,7 +74,7 @@ npm run tauri -- build        # installateurs natifs
 du -sh src-tauri/target/release/bundle
 ```
 
-Sur Linux de CI, un binaire `deb` ou AppImage peut servir de proxy de taille ; l’installateur Windows reste la métrique T9 officielle.
+Les installateurs Windows/macOS/Linux sont produits par le workflow GitHub **Publish** (push sur `main`). L’installateur Windows reste la métrique T9 officielle.
 
 ## Justification si dépassement
 

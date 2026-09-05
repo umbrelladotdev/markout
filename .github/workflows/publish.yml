@@ -1,0 +1,123 @@
+# Build Markout installers on every push to main and publish them for download.
+#
+# Where to get the app:
+# - GitHub Releases (recommended): https://github.com/umbrelladotdev/markout/releases/latest
+#   Rolling tag `latest` is updated on each successful main build.
+# - Workflow artifacts: Actions run → Artifacts (retained 90 days).
+name: Publish
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: publish-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Frontend production build
+        run: npm run build
+
+  publish-tauri:
+    name: Build (${{ matrix.label }})
+    needs: test
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            label: macOS Apple Silicon
+            args: --target aarch64-apple-darwin
+          - platform: macos-latest
+            label: macOS Intel
+            args: --target x86_64-apple-darwin
+          - platform: ubuntu-22.04
+            label: Linux x64
+            args: ""
+          - platform: windows-latest
+            label: Windows x64
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xdg-utils
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install Rust 1.88
+        uses: dtolnay/rust-toolchain@1.88.0
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Cache Rust build
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build and publish installers
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: latest
+          releaseName: "Markout (dernière build)"
+          releaseBody: |
+            Installateurs générés automatiquement depuis `main`.
+
+            **Commit :** ${{ github.sha }}
+
+            ### Windows (cible MVP)
+            - `*-setup.exe` — installateur NSIS (recommandé)
+            - `*.msi` — installateur MSI
+
+            WebView2 est déjà présent sur Windows 11. Sur Windows 10, l’installateur NSIS peut proposer le bootstrapper.
+
+            ### Linux
+            - `*.deb` — paquet Debian/Ubuntu
+
+            ### macOS
+            - `*.dmg` — image disque (application **non signée** : Gatekeeper peut afficher un avertissement)
+
+            Les mêmes fichiers sont aussi joints comme artefacts du run GitHub Actions (conservation 90 jours).
+          releaseDraft: false
+          prerelease: false
+          uploadWorkflowArtifacts: true
+          retryAttempts: 3
+          args: ${{ matrix.args }}
