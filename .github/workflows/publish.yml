@@ -1,4 +1,5 @@
-# Build Markout installers on every push to main and publish them for download.
+# Tests run on pull requests. Installers are published only from `main`
+# (push or workflow_dispatch).
 #
 # Where to get the app:
 # - GitHub Releases (recommended): https://github.com/umbrelladotdev/markout/releases/latest
@@ -9,14 +10,15 @@ name: Publish
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 concurrency:
   group: publish-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test:
@@ -43,6 +45,7 @@ jobs:
   publish-tauri:
     name: Build (${{ matrix.label }})
     needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
     strategy:
